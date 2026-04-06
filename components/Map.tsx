@@ -160,7 +160,9 @@ export default function Map() {
 
 		  if (!features.length) return
 
-		  const feature = features[0]	
+		  const feature = features[0] as maplibregl.MapGeoJSONFeature & {
+				geometry: GeoJSON.Point
+		}
 
 		  const cityId = Number(feature.properties.id)
 		  const cityName = feature.properties.city
