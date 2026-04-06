@@ -12,8 +12,10 @@ export default function Map() {
   const mapRef = useRef<maplibregl.Map | null>(null)
   const visitedRef = useRef<number[]>([])
 
+
   const [visited, setVisited] = useState<number[]>([])
-  const [dataLoaded, setDataLoaded] = useState(false)  
+  const [dataLoaded, setDataLoaded] = useState(false) 
+  const [mapLoaded, setMapLoaded] = useState(false)  
   const citiesDataRef = useRef<any>(null)
 
 	const countriesCount = useMemo(() => {
@@ -98,6 +100,7 @@ export default function Map() {
     map.on('load', async () => {
       const response = await fetch('/data/cities.geojson')
       const data = await response.json()
+	  setMapLoaded(true)
 	  citiesDataRef.current = data
 	  setDataLoaded(true)
 
@@ -112,10 +115,17 @@ export default function Map() {
         id: 'cities-layer',
         type: 'circle',
         source: 'cities',
-        paint: {
-          'circle-radius': 3,
-          'circle-color': '#888'
-        }
+		paint: {
+		  'circle-radius': [
+			'interpolate',
+			['linear'],
+			['zoom'],
+			1, 4,
+			5, 6,
+			10, 10
+		  ],
+		  'circle-color': '#9ca3af', // серый
+		}
       })
 
       // visited города (красные)
@@ -123,103 +133,107 @@ export default function Map() {
         id: 'visited-layer',
         type: 'circle',
         source: 'cities',
-        paint: {
-          'circle-radius': 4,
-          'circle-color': '#e63946'
-        },
+		paint: {
+		  'circle-radius': [
+			'interpolate',
+			['linear'],
+			['zoom'],
+			1, 4,
+			5, 6,
+			10, 10
+		  ],
+		  'circle-color': '#ef4444', // красный ✅
+		},
         filter: ['in', 'id', -1]
       })
 
       // клик по городу
-      map.on('click', 'cities-layer', (e) => {
-        const feature = e.features?.[0]
-        if (!feature) return
+		map.on('click', (e) => {
+		  const bbox: [[number, number], [number, number]] = [
+			[e.point.x - 10, e.point.y - 10],
+			[e.point.x + 10, e.point.y + 10]
+		  ]
 
-        const props = feature.properties as any
-        const coords = (feature.geometry as any).coordinates.slice()
+		  const features = map.queryRenderedFeatures(bbox, {
+			layers: ['cities-layer']
+		  })
 
-        const cityId = Number(props.id)
-        const cityName = String(props.city || 'Unknown')
-        const country = String(props.country || '')
+		  if (!features.length) return
 
-        const isVisited = visitedRef.current.includes(cityId)
+		  const feature = features[0]	
 
-        const popupHtml = `
-          <div style="font-family: sans-serif">
-            <strong>${cityName}</strong><br/>
-            ${country}<br/><br/>
-            ${
-              isVisited
-                ? `
-                  <div style="color: green; margin-bottom: 8px;">
-                    ✔ Visited
-                  </div>
-                  <button id="remove-btn">Remove mark</button>
-                `
-                : `<button id="visit-btn">Mark visited</button>`
-            }
-          </div>
-        `
+		  const cityId = Number(feature.properties.id)
+		  const cityName = feature.properties.city
 
-        const popup = new maplibregl.Popup()
-          .setLngLat(coords)
-          .setHTML(popupHtml)
-          .addTo(map)
+		  const isVisited = visitedRef.current.includes(cityId)
 
-        // обработка кнопок
-        setTimeout(() => {
-          const visitBtn = document.getElementById('visit-btn')
-          const removeBtn = document.getElementById('remove-btn')
+		  const popupContent = `
+			<div>
+			  <strong>${cityName}</strong><br/>
+			  ${
+				isVisited
+				  ? `<button id="remove-btn">Remove mark</button>`
+				  : `<button id="visit-btn">Mark visited</button>`
+			  }
+			</div>
+		  `
 
-		if (visitBtn) {
-		  visitBtn.onclick = async () => {
-			let { data } = await supabase.auth.getUser()
-			let user = data.user
+		  const popup = new maplibregl.Popup()
+			.setLngLat(feature.geometry.coordinates as [number, number])
+			.setHTML(popupContent)
+			.addTo(map)
 
-			if (!user) {
-			  const { data: newUser } = await supabase.auth.signInAnonymously()
-			  user = newUser.user
+		  setTimeout(() => {
+			const visitBtn = document.getElementById('visit-btn')
+			const removeBtn = document.getElementById('remove-btn')
+
+			if (visitBtn) {
+			  visitBtn.onclick = async () => {
+				let { data } = await supabase.auth.getUser()
+				let user = data.user
+
+				if (!user) {
+				  const { data: newUser } = await supabase.auth.signInAnonymously()
+				  user = newUser.user
+				}
+
+				if (user) {
+				  await supabase.from('visited_cities').insert({
+					user_id: user.id,
+					city_id: cityId
+				  })
+				}
+
+				setVisited((prev) =>
+				  prev.includes(cityId) ? prev : [...prev, cityId]
+				)
+
+				popup.remove()
+			  }
 			}
 
-			console.log('USER FOR INSERT:', user)
+			if (removeBtn) {
+			  removeBtn.onclick = async () => {
+				const { data } = await supabase.auth.getUser()
+				const user = data.user
 
-			if (user) {
-			  await supabase.from('visited_cities').insert({
-				user_id: user.id,
-				city_id: cityId
-			  })
+				if (user) {
+				  await supabase
+					.from('visited_cities')
+					.delete()
+					.eq('user_id', user.id)
+					.eq('city_id', cityId)
+				}
+
+				setVisited((prev) =>
+				  prev.filter((id) => id !== cityId)
+				)
+
+				popup.remove()
+			  }
 			}
-
-			setVisited((prev) =>
-			  prev.includes(cityId) ? prev : [...prev, cityId]
-			)
-
-			popup.remove()
-		  }
-		}
-
-		if (removeBtn) {
-		  removeBtn.onclick = async () => {
-			const { data } = await supabase.auth.getUser()
-			const user = data.user
-
-			if (user) {
-			  await supabase
-				.from('visited_cities')
-				.delete()
-				.eq('user_id', user.id)
-				.eq('city_id', cityId)
-			}
-
-			setVisited((prev) =>
-			  prev.filter((id) => id !== cityId)
-			)
-
-			popup.remove()
-		  }
-		}
-        }, 0)
-      })
+		  }, 0)
+		})
 	  // применяем visited сразу после загрузки карты
 		if (visitedRef.current.length > 0) {
 		  map.setFilter('visited-layer', [
@@ -238,11 +252,17 @@ export default function Map() {
 	  const map = mapRef.current
 	  if (!map) return
 
-	  if (!map.isStyleLoaded()) return
+	  if (!mapLoaded) return
 	  if (!map.getLayer('visited-layer')) return
 
-	  map.setFilter('visited-layer', ['in', 'id', ...visited])
-	}, [visited])
+	  console.log('Applying filter:', visited)
+
+	  map.setFilter('visited-layer', [
+		'in',
+		'id',
+		...visited
+	  ])
+	}, [visited, mapLoaded])
 
 	return (
 	  <>
