@@ -17,7 +17,36 @@ export default function Map() {
   const [dataLoaded, setDataLoaded] = useState(false) 
   const [mapLoaded, setMapLoaded] = useState(false)  
   const citiesDataRef = useRef<any>(null)
+  const MAP_VIEW_KEY = 'pinomap-map-view'
+	const fitToVisited = () => {
+	  if (!mapRef.current || visited.length === 0 || !citiesDataRef.current) return
 
+	  const visitedFeatures = citiesDataRef.current.features.filter((f: any) =>
+		visited.includes(Number(f.properties.id))
+	  )
+
+	  if (visitedFeatures.length === 0) return
+
+	  if (visitedFeatures.length === 1) {
+		const [lng, lat] = visitedFeatures[0].geometry.coordinates
+		mapRef.current.flyTo({
+		  center: [lng, lat],
+		  zoom: 7
+		})
+		return
+	  }
+
+	  const bounds = new maplibregl.LngLatBounds()
+
+	  visitedFeatures.forEach((f: any) => {
+		bounds.extend(f.geometry.coordinates)
+	  })
+
+	  mapRef.current.fitBounds(bounds, {
+		padding: 40,
+		maxZoom: 7
+	  })
+	}
 	const countriesCount = useMemo(() => {
 	  if (!dataLoaded || visited.length === 0) return 0
 
@@ -90,19 +119,49 @@ export default function Map() {
   }, [visited])
   useEffect(() => {
     if (mapRef.current) return
+	let initialCenter: [number, number] = [0, 20]
+	let initialZoom = 1.5
 
+	const savedView = localStorage.getItem(MAP_VIEW_KEY)
+
+	if (savedView) {
+	  try {
+		const parsed = JSON.parse(savedView)
+
+		if (
+		  Array.isArray(parsed.center) &&
+		  parsed.center.length === 2 &&
+		  typeof parsed.zoom === 'number'
+		) {
+		  initialCenter = parsed.center
+		  initialZoom = parsed.zoom
+		}
+	  } catch {}
+	}
     const map = new maplibregl.Map({
       container: mapContainer.current!,
       style: 'https://demotiles.maplibre.org/style.json',
-      center: [0, 20],
-      zoom: 2
+	center: initialCenter,
+	zoom: initialZoom
     })
     map.on('load', async () => {
       const response = await fetch('/data/cities.geojson')
       const data = await response.json()
+	  const saveMapView = () => {
+		const center = map.getCenter()
+
+		  localStorage.setItem(
+			MAP_VIEW_KEY,
+			JSON.stringify({
+			  center: [center.lng, center.lat],
+			  zoom: map.getZoom()
+			})
+		)
+	  }	  
 	  setMapLoaded(true)
 	  citiesDataRef.current = data
 	  setDataLoaded(true)
+	  map.on('moveend', saveMapView)
 
       // источник
       map.addSource('cities', {
@@ -313,10 +372,32 @@ export default function Map() {
 		  countriesCount={countriesCount}
 		/>
 
-		<div
-		  ref={mapContainer}
-		  style={{ width: '100%', height: '100vh' }}
-		/>
+		<div style={{ position: 'relative' }}>
+		  {visited.length > 0 && (
+			<button
+			  onClick={fitToVisited}
+			  style={{
+				position: 'absolute',
+				top: 12,
+				right: 12,
+				zIndex: 10,
+				background: 'white',
+				border: '1px solid #ddd',
+				borderRadius: 8,
+				padding: '8px 12px',
+				cursor: 'pointer',
+				boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+			  }}
+			>
+			  Fit to visited
+			</button>
+		  )}
+
+		  <div
+			ref={mapContainer}
+			style={{ width: '100%', height: '100vh' }}
+		  />
+		</div>
 	  </>
 	)
 }
