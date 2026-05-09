@@ -146,7 +146,47 @@ export default function Map() {
 		},
         filter: ['in', 'id', -1]
       })
+	  // добавляем слой в котором будем показыавет city labels
+		map.addLayer({
+		  id: 'city-labels',
+		  type: 'symbol',
+		  source: 'cities',
+		  layout: {
+			'text-field': ['get', 'city'],
+			'text-size': 11,
+			'text-offset': [0, 1.1],
+			'text-anchor': 'top',
+			'visibility': 'none'
+		  },
+		  paint: {
+			'text-color': '#374151'
+		  }
+		})	  
+		const updateLabelsVisibility = () => {
+		  const zoom = map.getZoom()
 
+		  if (!map.getLayer('city-labels')) return
+
+		const bounds = map.getBounds()
+
+		const visibleCities = citiesDataRef.current.features.filter((f: any) => {
+		  const [lng, lat] = f.geometry.coordinates
+		  return bounds.contains([lng, lat])
+		})
+
+		  const shouldShow = zoom >= 3.5 && visibleCities.length <= 40
+
+		  map.setLayoutProperty(
+			'city-labels',
+			'visibility',
+			shouldShow ? 'visible' : 'none'
+		  )
+		}
+		map.on('moveend', updateLabelsVisibility)
+		map.on('zoomend', updateLabelsVisibility)	
+        updateLabelsVisibility()		
+		
+		
       // клик по городу
 		map.on('click', (e) => {
 		  const bbox: [[number, number], [number, number]] = [
