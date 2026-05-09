@@ -153,7 +153,7 @@ export default function Map() {
 		  source: 'cities',
 		  layout: {
 			'text-field': ['get', 'city'],
-			'text-size': 11,
+			'text-size': 14,
 			'text-offset': [0, 1.1],
 			'text-anchor': 'top',
 			'visibility': 'none'
