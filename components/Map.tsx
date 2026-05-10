@@ -11,13 +11,15 @@ export default function Map() {
   const mapContainer = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
   const visitedRef = useRef<number[]>([])
-
+  const statsBarRef = useRef<HTMLDivElement | null>(null)
+  const [statsBarHeight, setStatsBarHeight] = useState(0)
 
   const [visited, setVisited] = useState<number[]>([])
   const [dataLoaded, setDataLoaded] = useState(false) 
   const [mapLoaded, setMapLoaded] = useState(false)  
   const citiesDataRef = useRef<any>(null)
   const MAP_VIEW_KEY = 'pinomap-map-view'
+
 	const fitToVisited = () => {
 	  if (!mapRef.current || visited.length === 0 || !citiesDataRef.current) return
 
@@ -47,6 +49,7 @@ export default function Map() {
 		maxZoom: 7
 	  })
 	}
+
 	const countriesCount = useMemo(() => {
 	  if (!dataLoaded || visited.length === 0) return 0
 
@@ -147,6 +150,20 @@ export default function Map() {
     map.on('load', async () => {
       const response = await fetch('/data/cities.geojson')
       const data = await response.json()
+	  useEffect(() => {
+	  const updateStatsBarHeight = () => {
+		  if (statsBarRef.current) {
+		    setStatsBarHeight(statsBarRef.current.offsetHeight)
+		  }
+	    }
+
+	    updateStatsBarHeight()
+	    window.addEventListener('resize', updateStatsBarHeight)
+
+	    return () => {
+	    	window.removeEventListener('resize', updateStatsBarHeight)
+	      }
+	    }, [])	  
 	  const saveMapView = () => {
 		const center = map.getCenter()
 
@@ -367,30 +384,33 @@ export default function Map() {
 
 	return (
 	  <>
-		<StatsBar
-		  citiesCount={visited.length}
-		  countriesCount={countriesCount}
-		/>
+		<div ref={statsBarRef}>
+		  <StatsBar
+			citiesCount={visited.length}
+			countriesCount={countriesCount}
+		  />
+		</div>
 
 		<div style={{ position: 'relative' }}>
 		  {visited.length > 0 && (
-			<button
-			  onClick={fitToVisited}
-			  style={{
-				position: 'absolute',
-				top: 12,
-				right: 12,
-				zIndex: 10,
-				background: 'white',
-				border: '1px solid #ddd',
-				borderRadius: 8,
-				padding: '8px 12px',
-				cursor: 'pointer',
-				boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-			  }}
-			>
-			  Fit to visited
-			</button>
+		<button
+		  onClick={fitToVisited}
+		  style={{
+			position: 'absolute',
+			top: statsBarHeight + 8,
+			right: 12,
+			zIndex: 10,
+			background: 'white',
+			border: '1px solid #ddd',
+			borderRadius: 8,
+			padding: window.innerWidth < 640 ? '6px 10px' : '8px 12px',
+			fontSize: window.innerWidth < 640 ? 12 : 14,
+			cursor: 'pointer',
+			boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+		  }}
+		>
+		  Fit to visited
+		</button>
 		  )}
 
 		  <div
