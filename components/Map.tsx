@@ -11,9 +11,23 @@ export default function Map() {
   const mapContainer = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
   const visitedRef = useRef<number[]>([])
+  //calcaulate StatusBar height
   const statsBarRef = useRef<HTMLDivElement | null>(null)
   const [statsBarHeight, setStatsBarHeight] = useState(0)
+  useEffect(() => {
+    const updateStatsBarHeight = () => {
+      if (statsBarRef.current) {
+        setStatsBarHeight(statsBarRef.current.offsetHeight)
+      }
+    }
 
+    updateStatsBarHeight()
+    window.addEventListener('resize', updateStatsBarHeight)
+
+    return () => {
+      window.removeEventListener('resize', updateStatsBarHeight)
+    }
+  }, [])	  
   const [visited, setVisited] = useState<number[]>([])
   const [dataLoaded, setDataLoaded] = useState(false) 
   const [mapLoaded, setMapLoaded] = useState(false)  
@@ -150,20 +164,6 @@ export default function Map() {
     map.on('load', async () => {
       const response = await fetch('/data/cities.geojson')
       const data = await response.json()
-	  useEffect(() => {
-	  const updateStatsBarHeight = () => {
-		  if (statsBarRef.current) {
-		    setStatsBarHeight(statsBarRef.current.offsetHeight)
-		  }
-	    }
-
-	    updateStatsBarHeight()
-	    window.addEventListener('resize', updateStatsBarHeight)
-
-	    return () => {
-	    	window.removeEventListener('resize', updateStatsBarHeight)
-	      }
-	    }, [])	  
 	  const saveMapView = () => {
 		const center = map.getCenter()
 
