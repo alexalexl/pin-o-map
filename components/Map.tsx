@@ -282,12 +282,23 @@ export default function Map() {
 
 		  const cityId = Number(feature.properties.id)
 		  const cityName = feature.properties.city
+		  const countryName = feature.properties.country
+		  const countryVisitedCount = citiesDataRef.current.features.filter((f: any) => {
+		    return (
+			  f.properties.country === countryName &&
+			  visitedRef.current.includes(Number(f.properties.id))
+		    )
+		  }).length		  
 
 		  const isVisited = visitedRef.current.includes(cityId)
 
 		  const popupContent = `
 			<div>
-			  <strong>${cityName}</strong><br/>
+			<div style="font-weight: 600;">${cityName}</div>
+			    <div style="font-size: 12px; color: #6b7280; margin-bottom: 6px;">
+					${countryName} · ${countryVisitedCount} visited
+					</div>
+			  
 			  ${
 				isVisited
 				  ? `<button id="remove-btn">Remove mark</button>`
