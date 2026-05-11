@@ -5,6 +5,8 @@ import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useMemo } from 'react'
 import StatsBar from './StatsBar'
+import { updateLabelsVisibility } from './map/labels'
+import { openCityPopup } from './map/cityClick'
 import { supabase } from '@/lib/supabase'
 
 export default function Map() {
@@ -33,6 +35,8 @@ export default function Map() {
   const [mapLoaded, setMapLoaded] = useState(false)  
   const citiesDataRef = useRef<any>(null)
   const MAP_VIEW_KEY = 'pinomap-map-view'
+  const isMobile =
+    typeof window !== 'undefined' && window.innerWidth < 640  
 
 	const fitToVisited = () => {
 	  if (!mapRef.current || visited.length === 0 || !citiesDataRef.current) return
@@ -131,9 +135,6 @@ export default function Map() {
 
 	  initAndLoad()
 	}, [])
-  useEffect(() => {
-	visitedRef.current = visited
-  }, [visited])
   useEffect(() => {
     if (mapRef.current) return
 	let initialCenter: [number, number] = [0, 20]
@@ -238,29 +239,10 @@ export default function Map() {
 			'text-color': '#374151'
 		  }
 		})	  
-		const updateLabelsVisibility = () => {
-		  const zoom = map.getZoom()
+		map.on('moveend', () => updateLabelsVisibility(map, citiesDataRef))
+		map.on('zoomend', () => updateLabelsVisibility(map, citiesDataRef))
 
-		  if (!map.getLayer('city-labels')) return
-
-		const bounds = map.getBounds()
-
-		const visibleCities = citiesDataRef.current.features.filter((f: any) => {
-		  const [lng, lat] = f.geometry.coordinates
-		  return bounds.contains([lng, lat])
-		})
-
-		  const shouldShow = zoom >= 3.5 && visibleCities.length <= 40
-
-		  map.setLayoutProperty(
-			'city-labels',
-			'visibility',
-			shouldShow ? 'visible' : 'none'
-		  )
-		}
-		map.on('moveend', updateLabelsVisibility)
-		map.on('zoomend', updateLabelsVisibility)	
-        updateLabelsVisibility()		
+		updateLabelsVisibility(map, citiesDataRef)	
 		
 		
       // клик по городу
@@ -277,91 +259,33 @@ export default function Map() {
 		  if (!features.length) return
 
 		  const feature = features[0] as maplibregl.MapGeoJSONFeature & {
-				geometry: GeoJSON.Point
-		}
+			geometry: GeoJSON.Point
+		  }
 
 		  const cityId = Number(feature.properties.id)
 		  const cityName = feature.properties.city
 		  const countryName = feature.properties.country
+
 		  const countryVisitedCount = citiesDataRef.current.features.filter((f: any) => {
-		    return (
+			return (
 			  f.properties.country === countryName &&
 			  visitedRef.current.includes(Number(f.properties.id))
-		    )
-		  }).length		  
+			)
+		  }).length
 
 		  const isVisited = visitedRef.current.includes(cityId)
 
-		  const popupContent = `
-			<div>
-			<div style="font-weight: 600;">${cityName}</div>
-			    <div style="font-size: 12px; color: #6b7280; margin-bottom: 6px;">
-					${countryName} · ${countryVisitedCount} visited
-					</div>
-			  
-			  ${
-				isVisited
-				  ? `<button id="remove-btn">Remove mark</button>`
-				  : `<button id="visit-btn">Mark visited</button>`
-			  }
-			</div>
-		  `
-
-		  const popup = new maplibregl.Popup()
-			.setLngLat(feature.geometry.coordinates as [number, number])
-			.setHTML(popupContent)
-			.addTo(map)
-
-		  setTimeout(() => {
-			const visitBtn = document.getElementById('visit-btn')
-			const removeBtn = document.getElementById('remove-btn')
-
-			if (visitBtn) {
-			  visitBtn.onclick = async () => {
-				let { data } = await supabase.auth.getUser()
-				let user = data.user
-
-				if (!user) {
-				  const { data: newUser } = await supabase.auth.signInAnonymously()
-				  user = newUser.user
-				}
-
-				if (user) {
-				  await supabase.from('visited_cities').insert({
-					user_id: user.id,
-					city_id: cityId
-				  })
-				}
-
-				setVisited((prev) =>
-				  prev.includes(cityId) ? prev : [...prev, cityId]
-				)
-
-				popup.remove()
-			  }
-			}
-
-			if (removeBtn) {
-			  removeBtn.onclick = async () => {
-				const { data } = await supabase.auth.getUser()
-				const user = data.user
-
-				if (user) {
-				  await supabase
-					.from('visited_cities')
-					.delete()
-					.eq('user_id', user.id)
-					.eq('city_id', cityId)
-				}
-
-				setVisited((prev) =>
-				  prev.filter((id) => id !== cityId)
-				)
-
-				popup.remove()
-			  }
-			}
-		  }, 0)
+		  openCityPopup({
+			map,
+			feature,
+			cityName,
+			countryName,
+			cityId,
+			isVisited,
+			countryVisitedCount,
+			setVisited,
+			supabase
+		  })
 		})
 	  // применяем visited сразу после загрузки карты
 		if (visitedRef.current.length > 0) {
@@ -414,8 +338,8 @@ export default function Map() {
 			background: 'white',
 			border: '1px solid #ddd',
 			borderRadius: 8,
-			padding: window.innerWidth < 640 ? '6px 10px' : '8px 12px',
-			fontSize: window.innerWidth < 640 ? 12 : 14,
+			padding: isMobile ? '6px 10px' : '8px 12px',
+			fontSize: isMobile < 640 ? 12 : 14,
 			cursor: 'pointer',
 			boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
 		  }}
