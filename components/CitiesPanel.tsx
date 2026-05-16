@@ -1,11 +1,14 @@
 type CitiesPanelProps = {
   visitedCities: any[]
   onCitySelect: (city: any) => void
+
+  onBackToMap: () => void
 }
 
 export default function CitiesPanel({
   visitedCities,
-  onCitySelect
+  onCitySelect,
+  onBackToMap
 }: CitiesPanelProps) {
   const grouped = visitedCities.reduce((acc: any, city: any) => {
     const country = city.properties.country
@@ -23,6 +26,20 @@ export default function CitiesPanel({
 
   return (
     <div
+	   <button
+	    onClick={onBackToMap}
+	    style={{
+		  border: 'none',
+		  background: '#e5e7eb',
+		  borderRadius: 8,
+		  padding: '10px 14px',
+		  marginBottom: 16,
+	  	  cursor: 'pointer',
+	  	  fontSize: 14
+	    }}
+	  >
+	    ← Back to map
+	  </button>	
       style={{
         padding: 16,
         overflowY: 'auto',

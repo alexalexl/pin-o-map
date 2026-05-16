@@ -386,6 +386,7 @@ export default function Map({
 	  return (
 		<CitiesPanel
 		  visitedCities={visitedCities}
+		  onBackToMap={() => setView('map')}
 		  onCitySelect={(city) => {
 			const [lng, lat] = city.geometry.coordinates
 
@@ -400,24 +401,26 @@ export default function Map({
 	  <>
 		<div style={{ position: 'relative' }}>
 		  {visited.length > 0 && (
-		<button
-		  onClick={fitToVisited}
-		  style={{
-			position: 'absolute',
-			top: statsBarHeight + 8,
-			right: 12,
-			zIndex: 10,
-			background: 'white',
-			border: '1px solid #ddd',
-			borderRadius: 8,
-			padding: isMobile ? '6px 10px' : '8px 12px',
-			fontSize: isMobile ? 12 : 14,
-			cursor: 'pointer',
-			boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-		  }}
-		>
-		  Fit to visited
-		</button>
+		  {view === 'map' && (
+			<button
+			  onClick={fitToVisited}
+			  style={{
+				position: 'absolute',
+				top: statsBarHeight + 8,
+				right: 12,
+				zIndex: 10,
+				background: 'white',
+				border: '1px solid #ddd',
+				borderRadius: 8,
+				padding: isMobile ? '6px 10px' : '8px 12px',
+				fontSize: isMobile ? 12 : 14,
+				cursor: 'pointer',
+				boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+			  }}
+			>
+			  Fit to visited
+			</button>
+			)}
 		  )}
 
 		  <div

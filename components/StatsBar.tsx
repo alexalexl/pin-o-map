@@ -37,12 +37,14 @@ export default function StatsBar({
       <Stat label="Cities" value={citiesCount} />
       <Stat label="Countries" value={countriesCount} />
       <Stat label="World" value={`${worldPercent}%`} />
-	<div
-	  style={{
-		display: 'flex',
-		gap: 8
-	  }}
-	>
+	{!isMobile && (
+	  <div
+		style={{
+		  display: 'flex',
+		  gap: 8
+		}}
+	  >
+	)}
 	  <button
 		onClick={() => setView('map')}
 		style={{
@@ -84,6 +86,9 @@ export default function StatsBar({
 }
 
 function Stat({ label, value }: { label: string; value: string | number }) {
+  const isMobile =
+    typeof window !== 'undefined' &&
+    window.innerWidth < 640	
   return (
     <div style={{ textAlign: 'center' }}>
       <div style={{ fontSize: 18, fontWeight: 600 }}>{value}</div>
