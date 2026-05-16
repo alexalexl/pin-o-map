@@ -19,22 +19,28 @@ export default function Home() {
   const countriesCount = 0
 
 return (
-  <>
+<>
+  {!(
+    typeof window !== 'undefined' &&
+    window.innerWidth < 640 &&
+    view === 'cities'
+  ) && (
     <StatsBar
       citiesCount={visited.length}
       countriesCount={countriesCount}
       view={view}
       setView={setView}
     />
+  )}
 
-    <Map
-      visited={visited}
-      setVisited={setVisited}
-      view={view}
-      setView={setView}
-      selectedCity={selectedCity}
-      setSelectedCity={setSelectedCity}
-    />
-  </>
+  <Map
+    visited={visited}
+    setVisited={setVisited}
+    view={view}
+    setView={setView}
+    selectedCity={selectedCity}
+    setSelectedCity={setSelectedCity}
+  />
+</>
 )
 }
