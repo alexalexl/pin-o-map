@@ -7,9 +7,39 @@ import { useMemo } from 'react'
 import StatsBar from './StatsBar'
 import { updateLabelsVisibility } from './map/labels'
 import { openCityPopup } from './map/cityClick'
+import CitiesPanel from './CitiesPanel'
 import { supabase } from '@/lib/supabase'
 
-export default function Map() {
+type MapProps = {
+  visited: number[]
+  setVisited: React.Dispatch<React.SetStateAction<number[]>>
+
+  view: 'map' | 'cities'
+  setView: React.Dispatch<
+    React.SetStateAction<'map' | 'cities'>
+  >
+
+  selectedCity: {
+    lng: number
+    lat: number
+  } | null
+
+  setSelectedCity: React.Dispatch<
+    React.SetStateAction<{
+      lng: number
+      lat: number
+    } | null>
+  >
+}
+
+export default function Map({
+  visited,
+  setVisited,
+  view,
+  setView,
+  selectedCity,
+  setSelectedCity
+}: MapProps) {
   const mapContainer = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
   const visitedRef = useRef<number[]>([])
@@ -30,7 +60,7 @@ export default function Map() {
       window.removeEventListener('resize', updateStatsBarHeight)
     }
   }, [])	  
-  const [visited, setVisited] = useState<number[]>([])
+ 
   const [dataLoaded, setDataLoaded] = useState(false) 
   const [mapLoaded, setMapLoaded] = useState(false)  
   const citiesDataRef = useRef<any>(null)
@@ -135,11 +165,27 @@ export default function Map() {
 
 	  initAndLoad()
 	}, [])
+	useEffect(() => {
+	  const loadCities = async () => {
+		if (citiesDataRef.current) return
+
+		const response = await fetch('/data/cities.geojson')
+		const data = await response.json()
+
+		citiesDataRef.current = data
+		setDataLoaded(true)
+	  }
+
+	  loadCities()
+	}, [])	
   useEffect(() => {
-    if (mapRef.current) return
 	let initialCenter: [number, number] = [0, 20]
 	let initialZoom = 1.5
-
+	//если это не map, то map не рендерим
+	if (view !== 'map') return
+	
+	if (mapContainer.current?.children.length) return
+	
 	const savedView = localStorage.getItem(MAP_VIEW_KEY)
 
 	if (savedView) {
@@ -163,8 +209,6 @@ export default function Map() {
 	zoom: initialZoom
     })
     map.on('load', async () => {
-      const response = await fetch('/data/cities.geojson')
-      const data = await response.json()
 	  const saveMapView = () => {
 		const center = map.getCenter()
 
@@ -177,8 +221,7 @@ export default function Map() {
 		)
 	  }	  
 	  setMapLoaded(true)
-	  citiesDataRef.current = data
-	  setDataLoaded(true)
+	  const data = citiesDataRef.current
 	  map.on('moveend', saveMapView)
 
       // источник
@@ -298,7 +341,11 @@ export default function Map() {
     })
 
     mapRef.current = map
-  }, [])
+	return () => {
+	  map.remove()
+	  mapRef.current = null
+	}	
+  }, [view])
 
   // обновление слоя visited
 	useEffect(() => {
@@ -316,16 +363,29 @@ export default function Map() {
 		...visited
 	  ])
 	}, [visited, mapLoaded])
+	
+	//показывает список городов
+	const visitedCities =
+	  citiesDataRef.current?.features.filter((f: any) =>
+		visited.includes(Number(f.properties.id))
+	  ) || []
+
+	if (view === 'cities') {
+	  return (
+		<CitiesPanel
+		  visitedCities={visitedCities}
+		  onCitySelect={(city) => {
+			const [lng, lat] = city.geometry.coordinates
+
+			setSelectedCity({ lng, lat })
+			setView('map')
+		  }}
+		/>
+	  )
+	}	
 
 	return (
 	  <>
-		<div ref={statsBarRef}>
-		  <StatsBar
-			citiesCount={visited.length}
-			countriesCount={countriesCount}
-		  />
-		</div>
-
 		<div style={{ position: 'relative' }}>
 		  {visited.length > 0 && (
 		<button
@@ -339,7 +399,7 @@ export default function Map() {
 			border: '1px solid #ddd',
 			borderRadius: 8,
 			padding: isMobile ? '6px 10px' : '8px 12px',
-			fontSize: isMobile < 640 ? 12 : 14,
+			fontSize: isMobile ? 12 : 14,
 			cursor: 'pointer',
 			boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
 		  }}

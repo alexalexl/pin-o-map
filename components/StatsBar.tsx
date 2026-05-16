@@ -1,9 +1,19 @@
-type Props = {
+type StatsBarProps = {
   citiesCount: number
   countriesCount: number
+
+  view: 'map' | 'cities'
+  setView: React.Dispatch<
+    React.SetStateAction<'map' | 'cities'>
+  >
 }
 
-export default function StatsBar({ citiesCount, countriesCount }: Props) {
+export default function StatsBar({
+  citiesCount,
+  countriesCount,
+  view,
+  setView
+}: StatsBarProps){
   const totalCountries = 195
   const worldPercent = Math.round((countriesCount / totalCountries) * 100)
 
@@ -27,6 +37,48 @@ export default function StatsBar({ citiesCount, countriesCount }: Props) {
       <Stat label="Cities" value={citiesCount} />
       <Stat label="Countries" value={countriesCount} />
       <Stat label="World" value={`${worldPercent}%`} />
+	<div
+	  style={{
+		display: 'flex',
+		gap: 8
+	  }}
+	>
+	  <button
+		onClick={() => setView('map')}
+		style={{
+		  border: 'none',
+		  borderRadius: 8,
+		  padding: '6px 10px',
+		  cursor: 'pointer',
+		  background: view === 'map'
+			? '#111827'
+			: '#e5e7eb',
+		  color: view === 'map'
+			? 'white'
+			: 'black'
+		}}
+	  >
+		Map
+	  </button>
+
+	  <button
+		onClick={() => setView('cities')}
+		style={{
+		  border: 'none',
+		  borderRadius: 8,
+		  padding: '6px 10px',
+		  cursor: 'pointer',
+		  background: view === 'cities'
+			? '#111827'
+			: '#e5e7eb',
+		  color: view === 'cities'
+			? 'white'
+			: 'black'
+		}}
+	  >
+		Cities
+	  </button>
+	</div>	  
     </div>
   )
 }
