@@ -363,7 +363,19 @@ export default function Map({
 		...visited
 	  ])
 	}, [visited, mapLoaded])
-	
+	//делает Fly to
+	useEffect(() => {
+	  if (!selectedCity) return
+	  if (!mapRef.current) return
+
+	  mapRef.current.flyTo({
+		center: [selectedCity.lng, selectedCity.lat],
+		zoom: 8,
+		duration: 2000
+	  })
+
+	  setSelectedCity(null)
+	}, [selectedCity])	
 	//показывает список городов
 	const visitedCities =
 	  citiesDataRef.current?.features.filter((f: any) =>
