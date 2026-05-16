@@ -370,7 +370,7 @@ export default function Map({
 
 	  mapRef.current.flyTo({
 		center: [selectedCity.lng, selectedCity.lat],
-		zoom: 8,
+		zoom: 9,
 		duration: 2000
 	  })
 

@@ -23,7 +23,9 @@ export default function CitiesPanel({
   }, {})
 
   const sortedCountries = Object.keys(grouped).sort()
-
+  const isMobile =
+    typeof window !== 'undefined' &&
+    window.innerWidth < 640
 return (
   <div
     style={{
@@ -33,20 +35,22 @@ return (
       background: '#fff'
     }}
   >
-    <button
-      onClick={onBackToMap}
-      style={{
-        border: 'none',
-        background: '#e5e7eb',
-        borderRadius: 8,
-        padding: '10px 14px',
-        marginBottom: 16,
-        cursor: 'pointer',
-        fontSize: 14
-      }}
-    >
-      ← Back to map
-    </button>
+	{isMobile && (
+	  <button
+		onClick={onBackToMap}
+		style={{
+		  border: 'none',
+		  background: '#e5e7eb',
+		  borderRadius: 8,
+		  padding: '10px 14px',
+		  marginBottom: 16,
+		  cursor: 'pointer',
+		  fontSize: 14
+		}}
+	  >
+		← Back to map
+	  </button>
+	)}
 
     {sortedCountries.map((country) => {
       const cities = grouped[country].sort((a: any, b: any) =>
