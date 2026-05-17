@@ -35,83 +35,77 @@ export default function StatsBar({
         padding: '10px 16px',
         borderRadius: 12,
         boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-        display: 'flex',
-        gap: 24,
+		display: 'flex',
+		display: 'flex',
+		gap: 24,
+		width: isMobile ? 'auto' : undefined,
         fontFamily: 'sans-serif',
         zIndex: 20,
         alignItems: 'center'
       }}
     >
-      <Stat label="Cities" value={citiesCount} />
-
-      <Stat label="Countries" value={countriesCount} />
-
-      <Stat label="World" value={`${worldPercent}%`} />
-
-	{!isMobile ? (
-	  <div
-		style={{
-		  display: 'flex',
-		  gap: 8
-		}}
-	  >
-		<button
-		  onClick={() => setView('map')}
+		<div
 		  style={{
-			border: 'none',
-			borderRadius: 8,
-			padding: '6px 10px',
-			cursor: 'pointer',
-			background:
-			  view === 'map'
-				? '#111827'
-				: '#e5e7eb',
-			color:
-			  view === 'map'
-				? 'white'
-				: 'black'
+			display: 'flex',
+			gap: 24,
+			alignItems: 'center'
 		  }}
 		>
-		  Map
-		</button>
+		  <Stat label="Cities" value={citiesCount} />
 
-		<button
-		  onClick={() => setView('cities')}
-		  style={{
-			border: 'none',
-			borderRadius: 8,
-			padding: '6px 10px',
-			cursor: 'pointer',
-			background:
-			  view === 'cities'
-				? '#111827'
-				: '#e5e7eb',
-			color:
-			  view === 'cities'
-				? 'white'
-				: 'black'
-		  }}
-		>
-		  Cities
-		</button>
-	  </div>
-	) : (
-	  view === 'map' && (
-		<button
-		  onClick={() => setView('cities')}
-		  style={{
-			border: 'none',
-			borderRadius: 8,
-			padding: '6px 10px',
-			cursor: 'pointer',
-			background: '#111827',
-			color: 'white'
-		  }}
-		>
-		  Cities
-		</button>
-	  )
-	)}
+		  <Stat label="Countries" value={countriesCount} />
+
+		  <Stat label="World" value={`${worldPercent}%`} />
+		</div>
+
+		{!isMobile && (
+		  <div
+			style={{
+			  display: 'flex',
+			  gap: 8
+			}}
+		  >
+			<button
+			  onClick={() => setView('map')}
+			  style={{
+				border: 'none',
+				borderRadius: 8,
+				padding: '6px 10px',
+				cursor: 'pointer',
+				background:
+				  view === 'map'
+					? '#111827'
+					: '#e5e7eb',
+				color:
+				  view === 'map'
+					? 'white'
+					: 'black'
+			  }}
+			>
+			  Map
+			</button>
+
+			<button
+			  onClick={() => setView('cities')}
+			  style={{
+				border: 'none',
+				borderRadius: 8,
+				padding: '6px 10px',
+				cursor: 'pointer',
+				background:
+				  view === 'cities'
+					? '#111827'
+					: '#e5e7eb',
+				color:
+				  view === 'cities'
+					? 'white'
+					: 'black'
+			  }}
+			>
+			  Cities
+			</button>
+		  </div>
+		)}
     </div>
   )
 }

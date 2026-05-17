@@ -16,7 +16,8 @@ export default function Home() {
 
   const [selectedCity, setSelectedCity] =
     useState<SelectedCity>(null)
-  const countriesCount = 0
+  const [countriesCount, setCountriesCount] =
+   useState(0)
 
 return (
 <>
@@ -25,13 +26,13 @@ return (
     window.innerWidth < 640 &&
     view === 'cities'
   ) && (
-    <StatsBar
-      citiesCount={visited.length}
-      countriesCount={countriesCount}
-      view={view}
-      setView={setView}
-    />
-  )}
+	<StatsBar
+	  citiesCount={visited.length}
+	  countriesCount={countriesCount}
+	  view={view}
+	  setView={setView}
+	/>
+	  )}
 
   <Map
     visited={visited}
@@ -40,6 +41,8 @@ return (
     setView={setView}
     selectedCity={selectedCity}
     setSelectedCity={setSelectedCity}
+	countriesCount={countriesCount}
+	setCountriesCount={setCountriesCount}	
   />
 </>
 )

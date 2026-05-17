@@ -1,3 +1,4 @@
+import { useState } from 'react'
 type CitiesPanelProps = {
   visitedCities: any[]
   onCitySelect: (city: any) => void
@@ -21,7 +22,17 @@ export default function CitiesPanel({
 
     return acc
   }, {})
+  
+  const [expandedCountries, setExpandedCountries] =
+    useState<Record<string, boolean>>({})
 
+  const toggleCountry = (country: string) => {
+    setExpandedCountries((prev) => ({
+      ...prev,
+      [country]: !prev[country]
+    }))
+  }
+	
   const sortedCountries = Object.keys(grouped).sort()
   const isMobile =
     typeof window !== 'undefined' &&
@@ -62,23 +73,48 @@ return (
           key={country}
           style={{ marginBottom: 24 }}
         >
-          <div
-            style={{
-              fontWeight: 700,
-              fontSize: 18,
-              marginBottom: 8
-            }}
-          >
-            {country}
-          </div>
+		<button
+		  onClick={() => toggleCountry(country)}
+		  style={{
+			width: '100%',
+			border: 'none',
+			background: '#f9fafb',
+			borderRadius: 10,
+			padding: '12px 14px',
+			display: 'flex',
+			alignItems: 'center',
+			gap: 10,
+			cursor: 'pointer',
+			marginBottom: 8
+		  }}
+		>
+			<div
+			  style={{
+				fontSize: 14,
+				color: '#666'
+			  }}
+			>
+			  {expandedCountries[country] ? '▼' : '▶'}
+			</div>
 
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 6
-            }}
-          >
+			<div
+			  style={{
+				fontWeight: 700,
+				fontSize: 16
+			  }}
+			>
+			  {country} · {cities.length} cities
+			</div>
+		</button>
+
+		{expandedCountries[country] && (
+		  <div
+			style={{
+			  display: 'flex',
+			  flexDirection: 'column',
+			  gap: 6
+			}}
+		  >
             {cities.map((city: any) => (
               <button
                 key={city.properties.id}
@@ -96,6 +132,7 @@ return (
               </button>
             ))}
           </div>
+		)}
         </div>
       )
     })}
