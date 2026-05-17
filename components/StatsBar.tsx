@@ -36,7 +36,6 @@ export default function StatsBar({
         borderRadius: 12,
         boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
 		display: 'flex',
-		display: 'flex',
 		gap: 24,
 		width: isMobile ? 'auto' : undefined,
         fontFamily: 'sans-serif',
