@@ -41,7 +41,6 @@ return (
     setView={setView}
     selectedCity={selectedCity}
     setSelectedCity={setSelectedCity}
-	countriesCount={countriesCount}
 	setCountriesCount={setCountriesCount}	
   />
 </>
