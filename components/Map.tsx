@@ -411,29 +411,31 @@ export default function Map({
 	return (
 	  <>
 		<div style={{ position: 'relative' }}>
-		{isMobile && view === 'map' && (
-		  <button
+		{isMobile &&
+		view === 'map' &&
+		visited.length > 0 && (
+			<button
 			onClick={() => setView('cities')}
 			style={{
-			  position: 'absolute',
-			  top: statsBarHeight + 8,
-			  left: 12,
-			  zIndex: 10,
-			  background: 'white',
-			  color: '#111827',
-			  border: '1px solid #ddd',
-			  borderRadius: 8,
-			  padding: isMobile ? '6px 10px' : '8px 12px',
-			  fontSize: isMobile ? 12 : 14,
-			  fontWeight: 500,
-			  cursor: 'pointer',
-			  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-			  height: isMobile ? 32 : 36
+				position: 'absolute',
+				top: statsBarHeight + 8,
+				left: 12,
+				zIndex: 10,
+				background: 'white',
+				color: '#111827',
+				border: '1px solid #ddd',
+				borderRadius: 8,
+				padding: isMobile ? '6px 10px' : '8px 12px',
+				fontSize: isMobile ? 12 : 14,
+				fontWeight: 500,
+				cursor: 'pointer',
+				boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+				height: isMobile ? 32 : 36
 			}}
-		  >
+			>
 			Cities
-		  </button>
-		)}		
+			</button>
+		)}	
 		{visited.length > 0 && view === 'map' && (
 		  <button
 			onClick={fitToVisited}

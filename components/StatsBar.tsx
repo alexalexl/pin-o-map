@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react'
+
 type StatsBarProps = {
   citiesCount: number
   countriesCount: number
@@ -20,9 +22,21 @@ export default function StatsBar({
     (countriesCount / totalCountries) * 100
   )
 
-  const isMobile =
-    typeof window !== 'undefined' &&
-    window.innerWidth < 640
+const [isMobile, setIsMobile] = useState(false)
+
+useEffect(() => {
+  const checkMobile = () => {
+    setIsMobile(window.innerWidth < 640)
+  }
+
+  checkMobile()
+
+  window.addEventListener('resize', checkMobile)
+
+  return () => {
+    window.removeEventListener('resize', checkMobile)
+  }
+}, [])
 
   return (
     <div
