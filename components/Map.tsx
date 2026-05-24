@@ -591,10 +591,14 @@ useEffect(() => {
 			</div>
 		</div>
 		)}
-		  <div
-			ref={mapContainer}
-			style={{ width: '100%', height: '100vh' }}
-		  />
+		<div
+		ref={mapContainer}
+		style={{
+			width: '100vw',
+			height: '100vh',
+			overflow: 'hidden'
+		}}
+		/>
 		</div>
 	  </>
 	)
