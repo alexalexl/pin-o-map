@@ -453,7 +453,7 @@ useEffect(() => {
 		<button
 			onClick={() => setSearchOpen(true)}
 			style={{
-			position: 'absolute',
+			position: 'fixed',
 			top: statsBarHeight + 8,
 			left: 12,
 			zIndex: 10,
@@ -476,7 +476,7 @@ useEffect(() => {
 			<button
 			onClick={() => setView('cities')}
 			style={{
-				position: 'absolute',
+				position: 'fixed',
 				top: statsBarHeight + 56,
 				left: 12,
 				zIndex: 10,
@@ -499,7 +499,7 @@ useEffect(() => {
 		  <button
 			onClick={fitToVisited}
 			style={{
-			position: 'absolute',
+			position: 'fixed',
 			top: statsBarHeight + 8,
 			right: 12,
 			zIndex: 10,
@@ -519,7 +519,7 @@ useEffect(() => {
 		{!isMobile && (
 		<div
 			style={{
-			position: 'absolute',
+			position: 'fixed',
 			top: 16,
 			left: 16,
 			zIndex: 20
@@ -543,7 +543,7 @@ useEffect(() => {
 		{searchOpen && (
 		<div
 			style={{
-			position: 'absolute',
+			position: 'fixed',
 			top: 12,
 			left: 12,
 			right: 12,
