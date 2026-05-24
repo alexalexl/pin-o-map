@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Map from '@/components/Map'
 import StatsBar from '@/components/StatsBar'
+import SearchBar from '@/components/SearchBar'
 
 export type SelectedCity = {
   lng: number
@@ -16,6 +17,9 @@ export default function Home() {
 
   const [selectedCity, setSelectedCity] =
     useState<SelectedCity>(null)
+
+  const [search, setSearch] = useState('')    
+
   const [countriesCount, setCountriesCount] =
    useState(0)
 
@@ -41,7 +45,9 @@ return (
     setView={setView}
     selectedCity={selectedCity}
     setSelectedCity={setSelectedCity}
-	setCountriesCount={setCountriesCount}	
+	  setCountriesCount={setCountriesCount}	
+    search={search}
+    setSearch={setSearch}
   />
 </>
 )

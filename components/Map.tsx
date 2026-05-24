@@ -9,6 +9,7 @@ import { updateLabelsVisibility } from './map/labels'
 import { openCityPopup } from './map/cityClick'
 import CitiesPanel from './CitiesPanel'
 import { supabase } from '@/lib/supabase'
+import SearchBar from './SearchBar'
 
 type MapProps = {
   visited: number[]
@@ -23,6 +24,11 @@ type MapProps = {
     lng: number
     lat: number
   } | null
+
+  search: string
+    setSearch: React.Dispatch<
+      React.SetStateAction<string>
+  >
 
   setSelectedCity: React.Dispatch<
     React.SetStateAction<{
@@ -43,7 +49,9 @@ export default function Map({
   setView,
   selectedCity,
   setSelectedCity,
-  setCountriesCount  
+  setCountriesCount,
+  search,
+  setSearch,    
 }: MapProps) {
   const mapContainer = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
@@ -69,9 +77,28 @@ export default function Map({
   const [dataLoaded, setDataLoaded] = useState(false) 
   const [mapLoaded, setMapLoaded] = useState(false)  
   const citiesDataRef = useRef<any>(null)
+  const [searchOpen, setSearchOpen] =
+   useState(false)
   const MAP_VIEW_KEY = 'pinomap-map-view'
-  const isMobile =
-    typeof window !== 'undefined' && window.innerWidth < 640  
+const [isMobile, setIsMobile] =
+  useState(false)
+
+useEffect(() => {
+  const checkMobile = () => {
+    setIsMobile(window.innerWidth < 640)
+  }
+
+  checkMobile()
+
+  window.addEventListener('resize', checkMobile)
+
+  return () => {
+    window.removeEventListener(
+      'resize',
+      checkMobile
+    )
+  }
+}, [])
 
 	const fitToVisited = () => {
 	  if (!mapRef.current || visited.length === 0 || !citiesDataRef.current) return
@@ -393,6 +420,17 @@ export default function Map({
 		visited.includes(Number(f.properties.id))
 	  ) || []
 
+	const searchResults =
+	search.length < 3 || !citiesDataRef.current
+		? []
+		: citiesDataRef.current.features
+			.filter((city: any) =>
+			city.properties.city
+				.toLowerCase()
+				.includes(search.toLowerCase())
+			)
+			.slice(0, 8)  
+
 	if (view === 'cities') {
 	  return (
 		<CitiesPanel
@@ -411,6 +449,27 @@ export default function Map({
 	return (
 	  <>
 		<div style={{ position: 'relative' }}>
+		{isMobile && view === 'map' && !searchOpen && (
+		<button
+			onClick={() => setSearchOpen(true)}
+			style={{
+			position: 'absolute',
+			top: statsBarHeight + 8,
+			left: 12,
+			zIndex: 10,
+			background: 'white',
+			border: '1px solid #ddd',
+			borderRadius: 8,
+			width: 36,
+			height: 36,
+			fontSize: 16,
+			cursor: 'pointer',
+			boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+			}}
+		>
+			🔍
+		</button>
+		)}		
 		{isMobile &&
 		view === 'map' &&
 		visited.length > 0 && (
@@ -418,7 +477,7 @@ export default function Map({
 			onClick={() => setView('cities')}
 			style={{
 				position: 'absolute',
-				top: statsBarHeight + 8,
+				top: statsBarHeight + 56,
 				left: 12,
 				zIndex: 10,
 				background: 'white',
@@ -440,24 +499,98 @@ export default function Map({
 		  <button
 			onClick={fitToVisited}
 			style={{
-			  position: 'absolute',
-			  top: statsBarHeight + 8,
-			  right: 12,
-			  zIndex: 10,
-			  background: 'white',
-			  border: '1px solid #ddd',
-			  borderRadius: 8,
-			  padding: isMobile ? '6px 10px' : '8px 12px',
-			  height: isMobile ? 32 : 36,
-			  fontSize: isMobile ? 12 : 14,
-			  cursor: 'pointer',
-			  boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+			position: 'absolute',
+			top: statsBarHeight + 8,
+			right: 12,
+			zIndex: 10,
+			background: 'white',
+			border: '1px solid #ddd',
+			borderRadius: 8,
+			padding: '0 14px',
+			height: 40,
+			fontSize: 14,
+			cursor: 'pointer',
+			boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
 			}}
 		  >
 			{isMobile ? 'Fit map' : 'Fit to visited'}
 		  </button>
 		)}
+		{!isMobile && (
+		<div
+			style={{
+			position: 'absolute',
+			top: 16,
+			left: 16,
+			zIndex: 20
+			}}
+		>
+			<SearchBar
+			search={search}
+			setSearch={setSearch}
+			results={searchResults}
+			onSelectCity={(city) => {
+				setSelectedCity({
+				lng: city.geometry.coordinates[0],
+				lat: city.geometry.coordinates[1]
+				})
 
+				setView('map')
+			}}
+			/>
+		</div>
+		)}		
+		{searchOpen && (
+		<div
+			style={{
+			position: 'absolute',
+			top: 12,
+			left: 12,
+			right: 12,
+			zIndex: 30,
+			background: 'white',
+			borderRadius: 12,
+			boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+			padding: 12
+			}}
+		>
+			<div
+			style={{
+				display: 'flex',
+				gap: 8,
+				marginBottom: 8
+			}}
+			>
+			<button
+				onClick={() => setSearchOpen(false)}
+				style={{
+				border: 'none',
+				background: '#f3f4f6',
+				borderRadius: 8,
+				padding: '0 12px',
+				cursor: 'pointer'
+				}}
+			>
+				←
+			</button>
+
+			<SearchBar
+				search={search}
+				setSearch={setSearch}
+				results={searchResults}
+				onSelectCity={(city) => {
+				setSelectedCity({
+					lng: city.geometry.coordinates[0],
+					lat: city.geometry.coordinates[1]
+				})
+
+				setSearchOpen(false)
+				setView('map')
+				}}
+			/>
+			</div>
+		</div>
+		)}
 		  <div
 			ref={mapContainer}
 			style={{ width: '100%', height: '100vh' }}
