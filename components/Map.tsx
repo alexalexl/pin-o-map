@@ -447,8 +447,7 @@ useEffect(() => {
 	}	
 
 	return (
-	  <>
-		<div style={{ position: 'relative' }}>
+	<>
 		{isMobile && view === 'map' && !searchOpen && (
 		<button
 			onClick={() => setSearchOpen(true)}
@@ -456,7 +455,7 @@ useEffect(() => {
 			position: 'fixed',
 			top: statsBarHeight + 8,
 			left: 12,
-			zIndex: 10,
+			zIndex: 30,
 			background: 'white',
 			border: '1px solid #ddd',
 			borderRadius: 8,
@@ -469,7 +468,8 @@ useEffect(() => {
 		>
 			🔍
 		</button>
-		)}		
+		)}
+
 		{isMobile &&
 		view === 'map' &&
 		visited.length > 0 && (
@@ -479,30 +479,31 @@ useEffect(() => {
 				position: 'fixed',
 				top: statsBarHeight + 56,
 				left: 12,
-				zIndex: 10,
+				zIndex: 30,
 				background: 'white',
 				color: '#111827',
 				border: '1px solid #ddd',
 				borderRadius: 8,
-				padding: isMobile ? '6px 10px' : '8px 12px',
-				fontSize: isMobile ? 12 : 14,
+				padding: '6px 10px',
+				fontSize: 12,
 				fontWeight: 500,
 				cursor: 'pointer',
 				boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-				height: isMobile ? 32 : 36
+				height: 32
 			}}
 			>
 			Cities
 			</button>
-		)}	
+		)}
+
 		{visited.length > 0 && view === 'map' && (
-		  <button
+		<button
 			onClick={fitToVisited}
 			style={{
 			position: 'fixed',
 			top: statsBarHeight + 8,
 			right: 12,
-			zIndex: 10,
+			zIndex: 30,
 			background: 'white',
 			border: '1px solid #ddd',
 			borderRadius: 8,
@@ -512,17 +513,18 @@ useEffect(() => {
 			cursor: 'pointer',
 			boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
 			}}
-		  >
+		>
 			{isMobile ? 'Fit map' : 'Fit to visited'}
-		  </button>
+		</button>
 		)}
+
 		{!isMobile && (
 		<div
 			style={{
 			position: 'fixed',
 			top: 16,
 			left: 16,
-			zIndex: 20
+			zIndex: 30
 			}}
 		>
 			<SearchBar
@@ -539,7 +541,8 @@ useEffect(() => {
 			}}
 			/>
 		</div>
-		)}		
+		)}
+
 		{searchOpen && (
 		<div
 			style={{
@@ -547,7 +550,7 @@ useEffect(() => {
 			top: 12,
 			left: 12,
 			right: 12,
-			zIndex: 30,
+			zIndex: 40,
 			background: 'white',
 			borderRadius: 12,
 			boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
@@ -591,15 +594,23 @@ useEffect(() => {
 			</div>
 		</div>
 		)}
+
 		<div
-		ref={mapContainer}
 		style={{
-			width: '100vw',
-			height: '100vh',
+			position: 'relative',
+			width: '100%',
+			height: '100dvh',
 			overflow: 'hidden'
 		}}
+		>
+		<div
+			ref={mapContainer}
+			style={{
+			width: '100%',
+			height: '100%'
+			}}
 		/>
 		</div>
-	  </>
-	)
-}
+	</>
+	)	
+	}
