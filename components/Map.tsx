@@ -408,7 +408,7 @@ useEffect(() => {
 
 	  mapRef.current.flyTo({
 		center: [selectedCity.lng, selectedCity.lat],
-		zoom: 9,
+		zoom: 10,
 		duration: 2000
 	  })
 
