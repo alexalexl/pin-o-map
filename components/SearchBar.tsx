@@ -18,7 +18,8 @@ export default function SearchBar({
   return (
       <div
         style={{
-          width: 320
+          width: '100%',
+          maxWidth: 320
         }}
       >
       <input

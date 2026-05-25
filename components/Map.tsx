@@ -543,20 +543,23 @@ useEffect(() => {
 		</div>
 		)}
 
-		{searchOpen && (
-		<div
-			style={{
-			position: 'fixed',
-			top: 12,
-			left: 12,
-			right: 12,
-			zIndex: 40,
-			background: 'white',
-			borderRadius: 12,
-			boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
-			padding: 12
-			}}
-		>
+			{searchOpen && (
+			<div
+				style={{
+				position: 'fixed',
+				top: 12,
+				left: '50%',
+				transform: 'translateX(-50%)',
+				width: 'calc(100% - 24px)',
+				maxWidth: 420,
+				zIndex: 40,
+				background: 'white',
+				borderRadius: 12,
+				boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+				padding: 12,
+				boxSizing: 'border-box'
+				}}
+			>
 			<div
 			style={{
 				display: 'flex',
