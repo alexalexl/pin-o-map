@@ -463,7 +463,9 @@ useEffect(() => {
 			height: 36,
 			fontSize: 16,
 			cursor: 'pointer',
-			boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+			boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+			boxSizing: 'border-box',
+			touchAction: 'manipulation'
 			}}
 		>
 			🔍
@@ -511,7 +513,10 @@ useEffect(() => {
 			height: 40,
 			fontSize: 14,
 			cursor: 'pointer',
-			boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+			boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+			boxSizing: 'border-box',
+			touchAction: 'manipulation',
+			maxWidth: 'calc(100vw - 24px)'			
 			}}
 		>
 			{isMobile ? 'Fit map' : 'Fit to visited'}
@@ -544,27 +549,34 @@ useEffect(() => {
 		)}
 
 		{searchOpen && (
+		<div
+			style={{
+			position: 'fixed',
+			top: 12,
+			left: 12,
+			right: 12,
+			zIndex: 40,
+			background: 'white',
+			borderRadius: 12,
+			boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+			overflow: 'hidden',
+
+			// Важно против горизонтального overflow на iOS.
+			boxSizing: 'border-box',
+			maxWidth: 'calc(100vw - 24px)'
+			}}
+		>
 			<div
-				style={{
-					position: 'fixed',
-					top: 12,
-					left: 12,
-					right: 12,
-					zIndex: 40,
-					background: 'white',
-					borderRadius: 12,
-					boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
-					overflow: 'hidden'
-				}}
+			style={{
+				display: 'flex',
+				gap: 8,
+				padding: 12,
+				alignItems: 'center',
+				boxSizing: 'border-box',
+				width: '100%',
+				minWidth: 0
+			}}
 			>
-				<div
-					style={{
-						display: 'flex',
-						gap: 8,
-						padding: 12,
-						alignItems: 'center'
-					}}
-				>
 			<button
 				onClick={() => setSearchOpen(false)}
 				style={{
@@ -572,26 +584,37 @@ useEffect(() => {
 				background: '#f3f4f6',
 				borderRadius: 8,
 				padding: '0 12px',
-				cursor: 'pointer'
+				cursor: 'pointer',
+				height: 40,
+
+				// Кнопка не должна сжиматься.
+				flexShrink: 0
 				}}
 			>
 				←
 			</button>
 
-			<SearchBar
+			<div
+				style={{
+				flex: 1,
+				minWidth: 0
+				}}
+			>
+				<SearchBar
 				search={search}
 				setSearch={setSearch}
 				results={searchResults}
 				onSelectCity={(city) => {
-				setSelectedCity({
+					setSelectedCity({
 					lng: city.geometry.coordinates[0],
 					lat: city.geometry.coordinates[1]
-				})
+					})
 
-				setSearchOpen(false)
-				setView('map')
+					setSearchOpen(false)
+					setView('map')
 				}}
-			/>
+				/>
+			</div>
 			</div>
 		</div>
 		)}
