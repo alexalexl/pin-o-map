@@ -16,29 +16,35 @@ export default function SearchBar({
   onSelectCity
 }: SearchBarProps) {
   return (
-      <div
-        style={{
-          width: '100%',
-          maxWidth: 320
-        }}
-      >
-      <input
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Search city..."
-        style={{
-          width: '100%',
-          height: 40,
-          padding: '0 14px',
-          borderRadius: 8,
-          border: '1px solid #ddd',
-          fontSize: 14,
-          outline: 'none',
-          boxSizing: 'border-box',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-          background: 'white'
-        }}
-      />
+    <div
+      style={{
+        width: '100%',
+        maxWidth: 320,
+        minWidth: 0,
+        boxSizing: 'border-box'
+      }}
+    >
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search city..."
+          style={{
+            width: '100%',
+            height: 52,
+            padding: '0 14px',
+            borderRadius: 8,
+            border: '1px solid #ddd',
+
+            // Важно для iPhone Safari.
+            // Если меньше 16px, Safari может зумить страницу при фокусе.
+            fontSize: 16,
+
+            outline: 'none',
+            boxSizing: 'border-box',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            background: 'white'
+          }}
+        />
 
       {results.length > 0 && (
         <div

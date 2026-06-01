@@ -503,7 +503,7 @@ useEffect(() => {
 			onClick={fitToVisited}
 			style={{
 			position: 'fixed',
-			top: statsBarHeight + 8,
+			top: statsBarHeight + 12,
 			right: 12,
 			zIndex: 30,
 			background: 'white',
