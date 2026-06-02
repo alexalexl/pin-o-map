@@ -24,6 +24,7 @@ export default function SearchBar({
         boxSizing: 'border-box'
       }}
     >
+      <div style={{ position: 'relative' }}>
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -45,7 +46,25 @@ export default function SearchBar({
             background: 'white'
           }}
         />
-
+      {search && (
+        <button
+          onClick={() => setSearch('')}
+          style={{
+            position: 'absolute',
+            right: 10,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            border: 'none',
+            background: 'transparent',
+            cursor: 'pointer',
+            fontSize: 18,
+            color: '#666'
+          }}
+        >
+          ×
+        </button>
+      )}
+      </div>
       {results.length > 0 && (
         <div
           style={{

@@ -453,7 +453,7 @@ useEffect(() => {
 			onClick={() => setSearchOpen(true)}
 			style={{
 			position: 'fixed',
-			top: statsBarHeight + 8,
+			top: statsBarHeight + 12,
 			left: 12,
 			zIndex: 30,
 			background: 'white',
