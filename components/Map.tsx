@@ -630,7 +630,7 @@ export default function Map({
 				search={search}
 				setSearch={setSearch}
 				results={searchResults}
-				recentSearches={recentSearches}
+				recentSearches={recentSearches.slice(0, 3)}
 				onClearRecentSearches={clearRecentSearches}
 				onSelectCity={(city) => {
 					addRecentSearch(city)
