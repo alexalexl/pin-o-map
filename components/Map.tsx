@@ -40,6 +40,12 @@ type MapProps = {
   setCountriesCount: React.Dispatch<
     React.SetStateAction<number>
   >  
+
+  recentSearches: any[]
+
+  addRecentSearch: (city: any) => void
+
+  clearRecentSearches: () => void  
 }
 
 export default function Map({
@@ -51,7 +57,10 @@ export default function Map({
   setSelectedCity,
   setCountriesCount,
   search,
-  setSearch,    
+  setSearch, 
+  recentSearches,
+  addRecentSearch,
+  clearRecentSearches,     
 }: MapProps) {
   const mapContainer = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
@@ -77,20 +86,33 @@ export default function Map({
   const [dataLoaded, setDataLoaded] = useState(false) 
   const [mapLoaded, setMapLoaded] = useState(false)  
   const citiesDataRef = useRef<any>(null)
+  const [debouncedSearch, setDebouncedSearch] =
+    useState('')  
   const [searchOpen, setSearchOpen] =
    useState(false)
   const MAP_VIEW_KEY = 'pinomap-map-view'
-const [isMobile, setIsMobile] =
-  useState(false)
+  const [isMobile, setIsMobile] =
+    useState(false)
 
-useEffect(() => {
-  const checkMobile = () => {
-    setIsMobile(window.innerWidth < 640)
-  }
+  useEffect(() => {
+   const timer = setTimeout(() => {
+     setDebouncedSearch(search)
+    }, 300)
 
-  checkMobile()
+  return () => clearTimeout(timer)
+  }, [search])
 
-  window.addEventListener('resize', checkMobile)
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640)
+    }
+
+    checkMobile()
+
+    window.addEventListener(
+    'resize',
+    checkMobile
+  )
 
   return () => {
     window.removeEventListener(
@@ -421,15 +443,15 @@ useEffect(() => {
 	  ) || []
 
 	const searchResults =
-	search.length < 3 || !citiesDataRef.current
+	debouncedSearch.length < 3 || !citiesDataRef.current
 		? []
 		: citiesDataRef.current.features
 			.filter((city: any) =>
 			city.properties.city
 				.toLowerCase()
-				.includes(search.toLowerCase())
+				.startsWith(debouncedSearch.toLowerCase())
 			)
-			.slice(0, 8)  
+			.slice(0, 8)
 
 	if (view === 'cities') {
 	  return (
@@ -536,7 +558,11 @@ useEffect(() => {
 			search={search}
 			setSearch={setSearch}
 			results={searchResults}
+			recentSearches={recentSearches}
+			onClearRecentSearches={clearRecentSearches}
 			onSelectCity={(city) => {
+				addRecentSearch(city)
+
 				setSelectedCity({
 				lng: city.geometry.coordinates[0],
 				lat: city.geometry.coordinates[1]
@@ -604,13 +630,16 @@ useEffect(() => {
 				search={search}
 				setSearch={setSearch}
 				results={searchResults}
+				recentSearches={recentSearches}
+				onClearRecentSearches={clearRecentSearches}
 				onSelectCity={(city) => {
+					addRecentSearch(city)
+
 					setSelectedCity({
 					lng: city.geometry.coordinates[0],
 					lat: city.geometry.coordinates[1]
 					})
 
-					setSearchOpen(false)
 					setView('map')
 				}}
 				/>
