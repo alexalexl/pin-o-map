@@ -1,3 +1,4 @@
+import { useState } from 'react'
 type SearchBarProps = {
   search: string
 
@@ -22,6 +23,7 @@ export default function SearchBar({
   onClearRecentSearches,
   onSelectCity
 }: SearchBarProps) {
+  const [showRecent, setShowRecent] = useState(true)
   return (
     <div
       style={{
@@ -35,6 +37,7 @@ export default function SearchBar({
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          onFocus={() => setShowRecent(true)}
           placeholder="Search city..."
           style={{
             width: '100%',
@@ -72,7 +75,9 @@ export default function SearchBar({
         </button>
       )}
       </div>
-{search.length === 0 && recentSearches.length > 0 && (
+{showRecent &&
+  search.length === 0 &&
+  recentSearches.length > 0 && (
   <div
     style={{
       marginTop: 8,
@@ -119,6 +124,7 @@ export default function SearchBar({
         <button
           key={city.properties.id}
           onClick={() => {
+            setShowRecent(false)
             onSelectCity(city)
             setSearch('')
           }}
@@ -178,6 +184,7 @@ export default function SearchBar({
             <button
               key={city.properties.id}
               onClick={() => {
+                setShowRecent(false)
                 onSelectCity(city)
                 setSearch('')
               }}

@@ -244,6 +244,9 @@ export default function Map({
 	//если это не map, то map не рендерим
 	if (view !== 'map') return
 	
+	// ждём, пока загрузятся данные городов
+	if (!dataLoaded) return
+
 	if (mapContainer.current?.children.length) return
 	
 	const savedView = localStorage.getItem(MAP_VIEW_KEY)
@@ -405,7 +408,7 @@ export default function Map({
 	  map.remove()
 	  mapRef.current = null
 	}	
-  }, [view])
+  }, [view, dataLoaded])
 
   // обновление слоя visited
 	useEffect(() => {
