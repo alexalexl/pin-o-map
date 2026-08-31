@@ -13,7 +13,7 @@ type CityClickParams = {
   supabase: any
 }
 
-export async function openCityPopup({
+export function openCityPopup({
   map,
   feature,
   cityName,
@@ -36,43 +36,130 @@ export async function openCityPopup({
     .setHTML(popupContent)
     .addTo(map)
 
-  const visitBtn = document.getElementById('visit-btn')
-  const removeBtn = document.getElementById('remove-btn')
+  // Ищем кнопки только внутри именно этого popup.
+  const popupElement = popup.getElement()
+
+  const visitBtn =
+    popupElement.querySelector<HTMLButtonElement>('#visit-btn')
+
+  const removeBtn =
+    popupElement.querySelector<HTMLButtonElement>('#remove-btn')
 
   if (visitBtn) {
-    visitBtn.onclick = async () => {
-      const user = (await supabase.auth.getUser()).data.user
+    visitBtn.onclick = () => {
+      // Сразу даём пользователю визуальный отклик.
+      visitBtn.disabled = true
+      visitBtn.textContent = '✓ Saved'
 
-      if (user) {
-        await supabase.from('visited_cities').insert({
-          user_id: user.id,
-          city_id: cityId
-        })
-      }
-
+      // Optimistic update:
+      // город становится красным немедленно,
+      // не ждём ответа Supabase.
       setVisited((prev) =>
         prev.includes(cityId) ? prev : [...prev, cityId]
       )
 
-      popup.remove()
+      // Немного показываем Saved, потом закрываем popup.
+      setTimeout(() => {
+        popup.remove()
+      }, 250)
+
+      // Сохраняем в Supabase в фоне.
+      void (async () => {
+        try {
+          const {
+            data: { user },
+            error: userError
+          } = await supabase.auth.getUser()
+
+          if (userError || !user) {
+            throw userError || new Error('User not found')
+          }
+
+          const { error } = await supabase
+            .from('visited_cities')
+            .insert({
+              user_id: user.id,
+              city_id: cityId
+            })
+
+          // Duplicate означает, что город уже был
+          // сохранён. Это не считаем настоящей ошибкой.
+          if (error && error.code !== '23505') {
+            throw error
+          }
+        } catch (error) {
+          console.error(
+            'Failed to save visited city:',
+            error
+          )
+
+          // Сервер не сохранил — возвращаем состояние назад.
+          setVisited((prev) =>
+            prev.filter((id) => id !== cityId)
+          )
+
+          alert(
+            `Could not save ${cityName}. Please try again.`
+          )
+        }
+      })()
     }
   }
 
   if (removeBtn) {
-    removeBtn.onclick = async () => {
-      const user = (await supabase.auth.getUser()).data.user
+    removeBtn.onclick = () => {
+      removeBtn.disabled = true
+      removeBtn.textContent = '✓ Removed'
 
-      if (user) {
-        await supabase
-          .from('visited_cities')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('city_id', cityId)
-      }
+      // Сразу убираем красную отметку.
+      setVisited((prev) =>
+        prev.filter((id) => id !== cityId)
+      )
 
-      setVisited((prev) => prev.filter((id) => id !== cityId))
+      setTimeout(() => {
+        popup.remove()
+      }, 250)
 
-      popup.remove()
+      // Supabase — в фоне.
+      void (async () => {
+        try {
+          const {
+            data: { user },
+            error: userError
+          } = await supabase.auth.getUser()
+
+          if (userError || !user) {
+            throw userError || new Error('User not found')
+          }
+
+          const { error } = await supabase
+            .from('visited_cities')
+            .delete()
+            .eq('user_id', user.id)
+            .eq('city_id', cityId)
+
+          if (error) {
+            throw error
+          }
+        } catch (error) {
+          console.error(
+            'Failed to remove visited city:',
+            error
+          )
+
+          // Не удалось удалить с сервера —
+          // возвращаем красную отметку.
+          setVisited((prev) =>
+            prev.includes(cityId)
+              ? prev
+              : [...prev, cityId]
+          )
+
+          alert(
+            `Could not remove ${cityName}. Please try again.`
+          )
+        }
+      })()
     }
   }
 }
