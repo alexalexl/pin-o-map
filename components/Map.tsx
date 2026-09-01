@@ -178,53 +178,79 @@ export default function Map({
 		visitedRef.current = visited
 	}, [visited])
 	
-	useEffect(() => {
-	  const initUser = async () => {
-		const { data } = await supabase.auth.getUser()
+useEffect(() => {
+  let cancelled = false
 
-		if (!data.user) {
-		  const { data: newUser } = await supabase.auth.signInAnonymously()
-		  console.log('NEW USER CREATED:', newUser)
-		} else {
-		  console.log('EXISTING USER:', data.user)
-		}
-	  }
+  const initAndLoad = async () => {
+    // 1. Получаем существующего пользователя
+    const {
+      data: userData,
+      error: userError
+    } = await supabase.auth.getUser()
 
-	  initUser()
-	}, [])
-	useEffect(() => {
-	  const initAndLoad = async () => {
-		// 1. получаем или создаём user
-		let { data } = await supabase.auth.getUser()
-		let user = data.user
+    if (userError) {
+      console.error('GET USER ERROR:', userError)
+    }
 
-		if (!user) {
-		  const { data: newUser } = await supabase.auth.signInAnonymously()
-		  user = newUser.user
-		}
+    let user = userData.user
 
-		if (!user) {
-		  console.log('NO USER AFTER INIT')
-		  return
-		}
+    // 2. Если пользователя ещё нет — создаём anonymous user
+    if (!user) {
+      const {
+        data: newUserData,
+        error: signInError
+      } = await supabase.auth.signInAnonymously()
 
-		console.log('USER READY:', user.id)
+      if (signInError || !newUserData.user) {
+        console.error(
+          'ANONYMOUS SIGN IN ERROR:',
+          signInError
+        )
+        return
+      }
 
-		// 2. загружаем visited
-		const { data: cities, error } = await supabase
-		  .from('visited_cities')
-		  .select('city_id')
-		  .eq('user_id', user.id)
+      user = newUserData.user
+    }
 
-		console.log('LOADED CITIES:', cities, error)
+    console.log('USER READY:', user.id)
 
-		if (cities) {
-		  setVisited(cities.map((c) => c.city_id))
-		}
-	  }
+    // 3. Загружаем visited cities
+    const {
+      data: cities,
+      error: citiesError
+    } = await supabase
+      .from('visited_cities')
+      .select('city_id')
+      .eq('user_id', user.id)
 
-	  initAndLoad()
-	}, [])
+    if (citiesError) {
+      console.error(
+        'LOAD VISITED CITIES ERROR:',
+        citiesError
+      )
+      return
+    }
+
+    console.log('LOADED CITIES:', cities)
+
+    // Если компонент уже размонтирован,
+    // состояние больше не меняем
+    if (cancelled) return
+
+    setVisited(
+      (cities ?? []).map((city) =>
+        Number(city.city_id)
+      )
+    )
+  }
+
+  initAndLoad()
+
+  return () => {
+    cancelled = true
+  }
+}, [setVisited])
+
 	useEffect(() => {
 	  const loadCities = async () => {
 		if (citiesDataRef.current) return
