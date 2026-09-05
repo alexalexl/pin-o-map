@@ -482,7 +482,7 @@ export default function Map({
 			style={{
 			position: 'fixed',
 			top: isMobile
-			? statsBarHeight + 12
+			? 72
 			: 60,
 			right: isMobile ? 12 : 16,
 			zIndex: 30,
