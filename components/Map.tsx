@@ -431,7 +431,7 @@ export default function Map({
 			onClick={() => setSearchOpen(true)}
 			style={{
 			position: 'fixed',
-			top: statsBarHeight + 12,
+			top: 16,
 			left: 12,
 			zIndex: 30,
 			background: 'white',
@@ -457,7 +457,7 @@ export default function Map({
 			onClick={() => setView('cities')}
 			style={{
 				position: 'fixed',
-				top: 92,
+				top: 88,
 				left: 12,
 				zIndex: 30,
 				background: 'white',
@@ -482,7 +482,7 @@ export default function Map({
 			style={{
 			position: 'fixed',
 			top: isMobile
-			? 92
+			? 88
 			: 60,
 			right: isMobile ? 12 : 16,
 			zIndex: 30,

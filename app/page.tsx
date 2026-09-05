@@ -387,13 +387,27 @@ export default function Home() {
                 '0 2px 8px rgba(0,0,0,0.15)'
             }}
           >
-            {!isAnonymous
-              ? '✓ Synced'
-              : authBusy
-                ? 'Opening Google...'
-                : visited.length > 0
-                  ? 'Save & sync'
-                  : 'Sign in'}
+            <>
+              <span className="auth-text-desktop">
+                {!isAnonymous
+                  ? '✓ Synced'
+                  : authBusy
+                    ? 'Opening Google...'
+                    : visited.length > 0
+                      ? 'Save & sync'
+                      : 'Sign in'}
+              </span>
+
+              <span className="auth-text-mobile">
+                {!isAnonymous
+                  ? '✓ Synced'
+                  : authBusy
+                    ? '...'
+                    : visited.length > 0
+                      ? 'Sync'
+                      : 'Sign in'}
+              </span>
+            </>
           </button>
 
           {authError && (

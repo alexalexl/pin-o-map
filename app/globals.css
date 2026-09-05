@@ -49,11 +49,30 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   overscroll-behavior-x: none;
 }
+.auth-text-mobile {
+  display: none !important;
+}
 
+.auth-text-desktop {
+  display: inline !important;
+}
 
 @media (max-width: 639px) {
+  .auth-text-desktop {
+    display: none !important;
+  }
+
+  .auth-text-mobile {
+    display: inline !important;
+  }
+
   .auth-control {
-    top: 92px;
-    right: 12px;
+    top: 16px !important;
+    right: 12px !important;
+  }
+
+  .auth-control button {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
   }
 }
