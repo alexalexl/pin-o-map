@@ -457,7 +457,7 @@ export default function Map({
 			onClick={() => setView('cities')}
 			style={{
 				position: 'fixed',
-				top: 140,
+				top: 92,
 				left: 12,
 				zIndex: 30,
 				background: 'white',
@@ -482,7 +482,7 @@ export default function Map({
 			style={{
 			position: 'fixed',
 			top: isMobile
-			? 140
+			? 92
 			: 60,
 			right: isMobile ? 12 : 16,
 			zIndex: 30,
