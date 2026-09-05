@@ -49,3 +49,11 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   overscroll-behavior-x: none;
 }
+
+
+@media (max-width: 639px) {
+  .auth-control {
+    top: 92px;
+    right: 12px;
+  }
+}

@@ -347,6 +347,7 @@ export default function Home() {
       {/* Google account button */}
       {authReady && (
         <div
+          className="auth-control"
           style={{
             position: 'fixed',
             top: 16,
@@ -372,7 +373,10 @@ export default function Home() {
               border: '1px solid #ddd',
               background: 'white',
               borderRadius: 8,
-              padding: '8px 12px',
+              padding: '0 12px',
+              height: 40,
+              boxSizing: 'border-box',
+              whiteSpace: 'nowrap',              
               fontSize: 14,
               fontWeight: 400,
               cursor:

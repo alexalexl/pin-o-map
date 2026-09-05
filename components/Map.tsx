@@ -437,8 +437,8 @@ export default function Map({
 			background: 'white',
 			border: '1px solid #ddd',
 			borderRadius: 8,
-			width: 36,
-			height: 36,
+			width: 40,
+			height: 40,
 			fontSize: 16,
 			cursor: 'pointer',
 			boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
@@ -457,7 +457,7 @@ export default function Map({
 			onClick={() => setView('cities')}
 			style={{
 				position: 'fixed',
-				top: statsBarHeight + 56,
+				top: 140,
 				left: 12,
 				zIndex: 30,
 				background: 'white',
@@ -469,7 +469,7 @@ export default function Map({
 				fontWeight: 500,
 				cursor: 'pointer',
 				boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-				height: 32
+				height: 40
 			}}
 			>
 			Cities
@@ -482,7 +482,7 @@ export default function Map({
 			style={{
 			position: 'fixed',
 			top: isMobile
-			? 72
+			? 140
 			: 60,
 			right: isMobile ? 12 : 16,
 			zIndex: 30,
