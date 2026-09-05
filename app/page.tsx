@@ -349,8 +349,8 @@ export default function Home() {
         <div
           style={{
             position: 'fixed',
-            top: 64,
-            right: 12,
+            top: 16,
+            right: 16,
             zIndex: 50,
             textAlign: 'right'
           }}
@@ -373,8 +373,8 @@ export default function Home() {
               background: 'white',
               borderRadius: 8,
               padding: '8px 12px',
-              fontSize: 13,
-              fontWeight: 600,
+              fontSize: 14,
+              fontWeight: 400,
               cursor:
                 isAnonymous
                   ? 'pointer'

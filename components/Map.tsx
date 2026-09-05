@@ -481,8 +481,10 @@ export default function Map({
 			onClick={fitToVisited}
 			style={{
 			position: 'fixed',
-			top: statsBarHeight + 12,
-			right: 12,
+			top: isMobile
+			? statsBarHeight + 12
+			: 60,
+			right: isMobile ? 12 : 16,
 			zIndex: 30,
 			background: 'white',
 			border: '1px solid #ddd',
