@@ -352,7 +352,7 @@ export default function Home() {
             position: 'fixed',
             top: 16,
             right: 16,
-            zIndex: 50,
+            zIndex: 30,
             textAlign: 'right'
           }}
         >
