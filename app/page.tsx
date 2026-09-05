@@ -313,6 +313,35 @@ export default function Home() {
     }
   }
 
+  const signOut = async () => {
+  const { error } = await supabase.auth.signOut()
+
+  if (error) {
+    console.error('SIGN OUT ERROR:', error)
+    return
+  }
+
+  // После logout создадим нового anonymous user
+  const {
+    data,
+    error: anonymousError
+  } = await supabase.auth.signInAnonymously()
+
+  if (anonymousError || !data.user) {
+    console.error(
+      'ANONYMOUS SIGN IN ERROR:',
+      anonymousError
+    )
+    return
+  }
+
+  setVisited([])
+  setIsAnonymous(true)
+  setUserEmail(null)
+
+  localStorage.removeItem('pinomap-pending-merge')
+}
+
   return (
     <>
       {/* Google account button */}
@@ -330,11 +359,9 @@ export default function Home() {
             onClick={
               isAnonymous
                 ? signInWithGoogle
-                : undefined
+                : signOut
             }
-            disabled={
-              authBusy || !isAnonymous
-            }
+                        disabled={authBusy}
             title={
               isAnonymous
                 ? 'Sync your map with Google'
