@@ -91,6 +91,9 @@ export default function Map({
   const [searchOpen, setSearchOpen] =
    useState(false)
   const MAP_VIEW_KEY = 'pinomap-map-view'
+  const MAPTILER_KEY = process.env.NEXT_PUBLIC_MAPTILER_KEY
+  const INTERNATIONAL_MAP_ID = '01a09bab-3e95-7bbf-82d7-247480f0fb55'
+  const RUSSIA_MAP_ID = '01a09beb-112d-7410-817d-538e1ead41c9'
   const [isMobile, setIsMobile] =
     useState(false)
 
@@ -218,9 +221,25 @@ export default function Map({
 		}
 	  } catch {}
 	}
+	const params =
+	new URLSearchParams(window.location.search)
+
+	const mapMode =
+	params.get('map') === 'ru'
+		? 'ru'
+		: 'intl'
+
+	const mapId =
+	mapMode === 'ru'
+		? RUSSIA_MAP_ID
+		: INTERNATIONAL_MAP_ID
+
+	const styleUrl =
+	`https://api.maptiler.com/maps/${mapId}/style.json?key=${MAPTILER_KEY}`	
+
 	const map = new maplibregl.Map({
 	container: mapContainer.current!,
-	style: `https://api.maptiler.com/maps/dataviz-v4/style.json?key=${process.env.NEXT_PUBLIC_MAPTILER_KEY}`,
+	style: styleUrl,
 	center: initialCenter,
 	zoom: initialZoom
 	})
