@@ -218,12 +218,12 @@ export default function Map({
 		}
 	  } catch {}
 	}
-    const map = new maplibregl.Map({
-      container: mapContainer.current!,
-      style: 'https://demotiles.maplibre.org/style.json',
+	const map = new maplibregl.Map({
+	container: mapContainer.current!,
+	style: `https://api.maptiler.com/maps/dataviz-v4/style.json?key=${process.env.NEXT_PUBLIC_MAPTILER_KEY}`,
 	center: initialCenter,
 	zoom: initialZoom
-    })
+	})
     map.on('load', async () => {
 	  const saveMapView = () => {
 		const center = map.getCenter()
