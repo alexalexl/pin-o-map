@@ -96,6 +96,8 @@ export default function Map({
   const RUSSIA_MAP_ID = '01a09beb-112d-7410-817d-538e1ead41c9'
   const [isMobile, setIsMobile] =
     useState(false)
+  const [mapMode, setMapMode] =
+    useState<'ru' | 'intl' | null>(null)
 
   useEffect(() => {
    const timer = setTimeout(() => {
@@ -124,6 +126,64 @@ export default function Map({
     )
   }
 }, [])
+
+	useEffect(() => {
+	const detectMapMode = async () => {
+		// Ручной override имеет приоритет.
+		// Нужен нам для тестирования.
+		const params =
+		new URLSearchParams(window.location.search)
+
+		const override = params.get('map')
+
+		if (override === 'ru') {
+		setMapMode('ru')
+		return
+		}
+
+		if (override === 'intl') {
+		setMapMode('intl')
+		return
+		}
+
+		try {
+		const response = await fetch('/api/geo', {
+			cache: 'no-store'
+		})
+
+		if (!response.ok) {
+			throw new Error(
+			`Geo request failed: ${response.status}`
+			)
+		}
+
+		const data = await response.json()
+
+		console.log(
+			'GEO:',
+			data.country,
+			'MAP:',
+			data.mapMode
+		)
+
+		setMapMode(
+			data.mapMode === 'ru'
+			? 'ru'
+			: 'intl'
+		)
+		} catch (error) {
+		console.error(
+			'GEO DETECTION ERROR:',
+			error
+		)
+
+		// Безопасный fallback
+		setMapMode('intl')
+		}
+	}
+
+	detectMapMode()
+	}, [])
 
 	const fitToVisited = () => {
 	  if (!mapRef.current || visited.length === 0 || !citiesDataRef.current) return
@@ -203,6 +263,8 @@ export default function Map({
 	// ждём, пока загрузятся данные городов
 	if (!dataLoaded) return
 
+	if (!mapMode) return	
+
 	if (mapContainer.current?.children.length) return
 	
 	const savedView = localStorage.getItem(MAP_VIEW_KEY)
@@ -221,13 +283,6 @@ export default function Map({
 		}
 	  } catch {}
 	}
-	const params =
-	new URLSearchParams(window.location.search)
-
-	const mapMode =
-	params.get('map') === 'ru'
-		? 'ru'
-		: 'intl'
 
 	const mapId =
 	mapMode === 'ru'
@@ -380,7 +435,7 @@ export default function Map({
 	  map.remove()
 	  mapRef.current = null
 	}	
-  }, [view, dataLoaded])
+  }, [view, dataLoaded, mapMode])
 
   // обновление слоя visited
 	useEffect(() => {
