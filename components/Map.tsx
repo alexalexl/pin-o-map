@@ -516,7 +516,7 @@ export default function Map({
 	  return (
 		<CitiesPanel
 		visitedCities={visitedCities}
-		mapMode={mapMode}
+		mapMode={mapMode ?? 'intl'}
 		onBackToMap={() => setView('map')}
 		onCitySelect={(city) => {
 			const [lng, lat] =
