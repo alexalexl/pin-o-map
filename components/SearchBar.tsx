@@ -156,10 +156,20 @@ export default function SearchBar({
                 style={{
                   fontSize: 13,
                   color: '#6b7280',
-                  marginTop: 2
+                  marginTop: 2,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
                 }}
               >
-                {city.properties.country}
+                {city.properties.showAdminName &&
+                city.properties.admin_name
+                  ? `${city.properties.admin_name} · ${
+                      city.properties.displayCountry ??
+                      city.properties.country
+                    }`
+                  : city.properties.displayCountry ??
+                    city.properties.country}
               </div>
             </div>
           </div>
@@ -211,10 +221,20 @@ export default function SearchBar({
                 style={{
                   fontSize: 13,
                   color: '#6b7280',
-                  marginTop: 2
+                  marginTop: 2,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
                 }}
               >
-                {city.properties.country}
+                {city.properties.showAdminName &&
+                city.properties.admin_name
+                  ? `${city.properties.admin_name} · ${
+                      city.properties.displayCountry ??
+                      city.properties.country
+                    }`
+                  : city.properties.displayCountry ??
+                    city.properties.country}
               </div>
             </button>
           ))}

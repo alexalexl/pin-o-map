@@ -63,7 +63,10 @@ export default function Home() {
       properties: {
         id: city.properties.id,
         city: city.properties.city,
-        country: city.properties.country
+        country: city.properties.country,
+        admin_name: city.properties.admin_name,
+        displayCountry: city.properties.displayCountry,
+        showAdminName: city.properties.showAdminName
       },
       geometry: {
         coordinates: city.geometry.coordinates

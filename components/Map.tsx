@@ -550,6 +550,33 @@ const selectedMarkerMoveEndCountRef =
 	  citiesDataRef.current?.features.filter((f: any) =>
 		visited.includes(Number(f.properties.id))
 	  ) || []
+	const duplicateCityKeys = useMemo(() => {
+	const counts: Record<string, number> = {}
+
+	if (!dataLoaded || !citiesDataRef.current) {
+		return new Set<string>()
+	}
+
+	const mode = mapMode ?? 'intl'
+
+	citiesDataRef.current.features.forEach((city: any) => {
+		const cityName =
+		city.properties.city.trim().toLowerCase()
+
+		const countryName =
+		getCountryName(city, mode).trim().toLowerCase()
+
+		const key = `${countryName}|${cityName}`
+
+		counts[key] = (counts[key] ?? 0) + 1
+	})
+
+	return new Set(
+		Object.keys(counts).filter(
+		(key) => counts[key] > 1
+		)
+	)
+	}, [dataLoaded, mapMode])
 
 	const searchResults =
 	debouncedSearch.length < 3 || !citiesDataRef.current
@@ -561,6 +588,29 @@ const selectedMarkerMoveEndCountRef =
 				.includes(debouncedSearch.toLowerCase())
 			)
 			.slice(0, 8)
+			.map((city: any) => {
+			const displayCountry =
+				getCountryName(
+				city,
+				mapMode ?? 'intl'
+				)
+
+			const key =
+				`${displayCountry.toLowerCase()}|` +
+				city.properties.city
+				.trim()
+				.toLowerCase()
+
+			return {
+				...city,
+				properties: {
+				...city.properties,
+				displayCountry,
+				showAdminName:
+					duplicateCityKeys.has(key)
+				}
+			}
+			})
 
 	if (view === 'cities') {
 	  return (
