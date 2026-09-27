@@ -98,7 +98,19 @@ export default function Map({
     useState(false)
   const [mapMode, setMapMode] =
     useState<'ru' | 'intl' | null>(null)
+  const getCountryName = (
+    city: any,
+    mode: 'ru' | 'intl'
+  ) => {
+   if (
+      mode === 'ru' &&
+      city.properties.country_ru
+    ) {
+      return city.properties.country_ru
+    }
 
+    return city.properties.country
+  }
   useEffect(() => {
    const timer = setTimeout(() => {
      setDebouncedSearch(search)
@@ -216,22 +228,32 @@ export default function Map({
 	}
 
 	const countriesCount = useMemo(() => {
-	  if (!dataLoaded || visited.length === 0) return 0
+	if (
+		!dataLoaded ||
+		!mapMode ||
+		visited.length === 0
+	) {
+		return 0
+	}
 
-	  const countries = new Set<string>()
+	const countries = new Set<string>()
 
-	  visited.forEach((id) => {
-		const feature = citiesDataRef.current.features.find(
-		  (f: any) => Number(f.properties.id) === id
+	visited.forEach((id) => {
+		const feature =
+		citiesDataRef.current.features.find(
+			(f: any) =>
+			Number(f.properties.id) === id
 		)
 
 		if (feature) {
-		  countries.add(feature.properties.country)
+		countries.add(
+			getCountryName(feature, mapMode)
+		)
 		}
-	  })
+	})
 
-	  return countries.size
-	}, [visited, dataLoaded])
+	return countries.size
+	}, [visited, dataLoaded, mapMode])
 	
 	useEffect(() => {
 	  setCountriesCount(countriesCount)
@@ -397,14 +419,21 @@ export default function Map({
 
 		  const cityId = Number(feature.properties.id)
 		  const cityName = feature.properties.city
-		  const countryName = feature.properties.country
+		  const countryName =
+  				getCountryName(feature, mapMode)
 
-		  const countryVisitedCount = citiesDataRef.current.features.filter((f: any) => {
-			return (
-			  f.properties.country === countryName &&
-			  visitedRef.current.includes(Number(f.properties.id))
-			)
-		  }).length
+			const countryVisitedCount =
+			citiesDataRef.current.features.filter(
+				(f: any) => {
+				return (
+					getCountryName(f, mapMode) ===
+					countryName &&
+					visitedRef.current.includes(
+					Number(f.properties.id)
+					)
+				)
+				}
+			).length
 
 		  const isVisited = visitedRef.current.includes(cityId)
 
@@ -486,14 +515,16 @@ export default function Map({
 	if (view === 'cities') {
 	  return (
 		<CitiesPanel
-		  visitedCities={visitedCities}
-		  onBackToMap={() => setView('map')}
-		  onCitySelect={(city) => {
-			const [lng, lat] = city.geometry.coordinates
+		visitedCities={visitedCities}
+		mapMode={mapMode}
+		onBackToMap={() => setView('map')}
+		onCitySelect={(city) => {
+			const [lng, lat] =
+			city.geometry.coordinates
 
 			setSelectedCity({ lng, lat })
 			setView('map')
-		  }}
+		}}
 		/>
 	  )
 	}	

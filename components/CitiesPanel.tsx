@@ -1,8 +1,9 @@
 import { useState } from 'react'
+import * as Flags from 'country-flag-icons/react/3x2'
 type CitiesPanelProps = {
   visitedCities: any[]
+  mapMode: 'ru' | 'intl'
   onCitySelect: (city: any) => void
-
   onBackToMap: () => void
 }
 const countryFlags: Record<string, string> = {
@@ -398,14 +399,49 @@ const capitals: Record<string, string> = {
   Zambia: 'Lusaka',
   Zimbabwe: 'Harare'
 }
+function CountryFlag({
+  code
+}: {
+  code?: string
+}) {
+  if (!code) return <span>🌍</span>
 
+  const Flag =
+    Flags[
+      code.toUpperCase() as keyof typeof Flags
+    ]
+
+  if (!Flag) return <span>🌍</span>
+
+  return (
+    <Flag
+      style={{
+        width: 22,
+        height: 15,
+        display: 'inline-block',
+        flexShrink: 0
+      }}
+    />
+  )
+}
 export default function CitiesPanel({
   visitedCities,
+  mapMode,
   onCitySelect,
   onBackToMap
 }: CitiesPanelProps) {
+  const getCountryName = (city: any) => {
+  if (
+    mapMode === 'ru' &&
+    city.properties.country_ru
+  ) {
+    return city.properties.country_ru
+  }
+
+  return city.properties.country
+}
   const grouped = visitedCities.reduce((acc: any, city: any) => {
-    const country = city.properties.country
+    const country = getCountryName(city)
 
     if (!acc[country]) {
       acc[country] = []
@@ -474,7 +510,12 @@ return (
           )
         }
       )
-
+      const countryCode =
+        country === 'Russia'
+          ? 'RU'
+          : country === 'Ukraine'
+            ? 'UA'
+            : cities[0]?.properties.iso2
       return (
         <div
           key={country}
@@ -510,7 +551,19 @@ return (
 				fontSize: 16
 			  }}
 			>
-			  {countryFlags[country] || '🌍'} {country} · {cities.length} cities
+			  <span
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 7
+        }}
+      >
+        <CountryFlag code={countryCode} />
+
+        <span>
+          {country} · {cities.length} cities
+        </span>
+      </span>
 			</div>
 		</button>
 
