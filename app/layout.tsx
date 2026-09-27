@@ -13,8 +13,35 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Pin-o-map",
-  description: "Mark visited cities on the map",
+  title: 'Pin-o-map',
+  description: 'Mark the cities and countries you have visited.',
+
+  icons: {
+    icon: [
+      {
+        url: '/favicon.ico',
+      },
+      {
+        url: '/icons/pinomap_icon_192.png',
+        sizes: '192x192',
+        type: 'image/png',
+      },
+    ],
+
+    apple: [
+      {
+        url: '/icons/pinomap_icon_180.png',
+        sizes: '180x180',
+        type: 'image/png',
+      },
+    ],
+  },
+
+  appleWebApp: {
+    capable: true,
+    title: 'Pin-o-map',
+    statusBarStyle: 'default',
+  },
 };
 
 export const viewport: Viewport = {
