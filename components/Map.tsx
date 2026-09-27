@@ -64,6 +64,10 @@ export default function Map({
 }: MapProps) {
   const mapContainer = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
+  const selectedMarkerRef =
+    useRef<maplibregl.Marker | null>(null)
+const selectedMarkerMoveEndCountRef =
+    useRef(0)
   const visitedRef = useRef<number[]>([])
   //calcaulate StatusBar height
   const statsBarRef = useRef<HTMLDivElement | null>(null)
@@ -227,6 +231,39 @@ export default function Map({
 	  })
 	}
 
+	const showSelectedCityMarker = (city: any) => {
+	const map = mapRef.current
+	if (!map) return
+
+	selectedMarkerRef.current?.remove()
+	selectedMarkerMoveEndCountRef.current = 0
+
+	const el = document.createElement('div')
+
+	el.textContent = city.properties.city
+
+	el.style.background = 'white'
+	el.style.color = '#111827'
+	el.style.padding = '4px 8px'
+	el.style.borderRadius = '6px'
+	el.style.fontSize = '13px'
+	el.style.fontWeight = '600'
+	el.style.boxShadow =
+		'0 2px 8px rgba(0,0,0,0.18)'
+	el.style.whiteSpace = 'nowrap'
+	el.style.pointerEvents = 'none'
+
+	selectedMarkerRef.current =
+		new maplibregl.Marker({
+		element: el,
+		anchor: 'bottom'
+		})
+		.setLngLat(
+			city.geometry.coordinates as [number, number]
+		)
+		.addTo(map)
+	}	
+
 	const countriesCount = useMemo(() => {
 	if (
 		!dataLoaded ||
@@ -320,6 +357,19 @@ export default function Map({
 	center: initialCenter,
 	zoom: initialZoom
 	})
+	map.on('moveend', () => {
+	if (!selectedMarkerRef.current) return
+
+	selectedMarkerMoveEndCountRef.current += 1
+
+	if (
+		selectedMarkerMoveEndCountRef.current >= 3
+	) {
+		selectedMarkerRef.current.remove()
+		selectedMarkerRef.current = null
+		selectedMarkerMoveEndCountRef.current = 0
+	}
+	})	
     map.on('load', async () => {
 	  const saveMapView = () => {
 		const center = map.getCenter()
@@ -508,7 +558,7 @@ export default function Map({
 			.filter((city: any) =>
 			city.properties.city
 				.toLowerCase()
-				.startsWith(debouncedSearch.toLowerCase())
+				.includes(debouncedSearch.toLowerCase())
 			)
 			.slice(0, 8)
 
@@ -625,12 +675,11 @@ export default function Map({
 			onClearRecentSearches={clearRecentSearches}
 			onSelectCity={(city) => {
 				addRecentSearch(city)
-
+				showSelectedCityMarker(city)
 				setSelectedCity({
 				lng: city.geometry.coordinates[0],
 				lat: city.geometry.coordinates[1]
 				})
-
 				setView('map')
 			}}
 			/>
@@ -697,12 +746,12 @@ export default function Map({
 				onClearRecentSearches={clearRecentSearches}
 				onSelectCity={(city) => {
 					addRecentSearch(city)
-
+					showSelectedCityMarker(city)
 					setSelectedCity({
 					lng: city.geometry.coordinates[0],
 					lat: city.geometry.coordinates[1]
 					})
-
+					setSearchOpen(false)
 					setView('map')
 				}}
 				/>
